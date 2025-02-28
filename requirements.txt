@@ -1,0 +1,10 @@
+pytest==8.3.4
+pytest-cov==6.0.0
+black==24.10.0
+ruff==0.8.4
+pylint==3.3.2
+flake8==7.1.1
+mypy==1.13.0
+complexipy==1.2.0
+mkdocs==1.6.1
+mkdocs-material==9.5.49
