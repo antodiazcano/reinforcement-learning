@@ -6,7 +6,7 @@ import torch
 from torch import nn
 from torch.distributions import Categorical
 
-from src.snake_ai import SnakeAI
+from src.snake import SnakeAI
 from src.constants import Direction, BLOCK_SIZE
 
 
@@ -56,22 +56,22 @@ class Agent(nn.Module):
 
         # Possible collisions
         collision_straight = (
-            (dir_r and game.is_collision_point(point_r))
-            or (dir_l and game.is_collision_point(point_l))
-            or (dir_u and game.is_collision_point(point_u))
-            or (dir_d and game.is_collision_point(point_d)),
+            (dir_r and game.is_collision(point_r))
+            or (dir_l and game.is_collision(point_l))
+            or (dir_u and game.is_collision(point_u))
+            or (dir_d and game.is_collision(point_d)),
         )[0]
         collision_right = (
-            (dir_u and game.is_collision_point(point_r))
-            or (dir_d and game.is_collision_point(point_l))
-            or (dir_l and game.is_collision_point(point_u))
-            or (dir_r and game.is_collision_point(point_d)),
+            (dir_u and game.is_collision(point_r))
+            or (dir_d and game.is_collision(point_l))
+            or (dir_l and game.is_collision(point_u))
+            or (dir_r and game.is_collision(point_d)),
         )[0]
         collision_left = (
-            (dir_d and game.is_collision_point(point_r))
-            or (dir_u and game.is_collision_point(point_l))
-            or (dir_r and game.is_collision_point(point_u))
-            or (dir_l and game.is_collision_point(point_d)),
+            (dir_d and game.is_collision(point_r))
+            or (dir_u and game.is_collision(point_l))
+            or (dir_r and game.is_collision(point_u))
+            or (dir_l and game.is_collision(point_d)),
         )[0]
 
         return torch.tensor(

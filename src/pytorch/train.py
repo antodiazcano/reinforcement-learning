@@ -5,9 +5,9 @@ Script for the training of the agent.
 from collections import deque
 import torch
 import matplotlib.pyplot as plt
-from tqdm import tqdm
+from tqdm import tqdm  # type: ignore
 
-from src.snake_ai import SnakeAI
+from src.snake import SnakeAI
 from src.pytorch.model import Agent
 
 
@@ -42,11 +42,11 @@ class Trainer:
 
         saved_probs: list[torch.Tensor] = []
         rewards: list[int] = []
-        game = SnakeAI()
+        game = SnakeAI(visualize=False)
 
         game_over = False
         while not game_over:
-            action, prob = self.agent.predict(game)
+            action, prob = self.agent.act(game)
             game_over, reward = game.play_step(action)
             rewards.append(reward)
             saved_probs.append(prob)
@@ -54,9 +54,9 @@ class Trainer:
         return rewards, saved_probs
 
     @staticmethod
-    def standardize(x: deque | torch.Tensor) -> torch.Tensor:
+    def standardize(x: deque) -> torch.Tensor:
         """
-        Function to standardize a tensor.
+        Function to standardize a list.
 
         Parameters
         ----------
@@ -68,11 +68,7 @@ class Trainer:
         """
 
         eps = 1e-8
-        if not isinstance(x, torch.Tensor):
-            x_tensor = torch.tensor(x)
-        else:
-            x_tensor = x.clone()
-
+        x_tensor = torch.tensor(x)
         return (x_tensor - x_tensor.mean()) / (x_tensor.std() + eps)
 
     def fit(
@@ -145,8 +141,8 @@ class Trainer:
         # Update best agent
         if self.rewards[-1] > best_reward:
             best_reward = self.rewards[-1]
-            torch.save(self.agent.state_dict(), "weights/agent.pt")
-            print(f"Epoch: {epoch}, running mean: {best_reward:.2f}")
+            torch.save(self.agent.state_dict(), "weights/agent_pytorch.pt")
+            print(f"Epoch: {epoch}, new best mean reward: {best_reward:.2f}")
 
         return best_reward
 
@@ -161,7 +157,6 @@ class Trainer:
         axs.set_xlabel("Epoch")
         axs.set_ylabel("Mean Reward")
         axs.plot(range(1, len(self.rewards) + 1), self.rewards)
-        axs.legend()
 
         fig.savefig("images/train.png")
         plt.close(fig)
@@ -175,7 +170,7 @@ def main() -> None:
     agent = Agent()
     trainer = Trainer(agent)
 
-    epochs = 100
+    epochs = 10
     gamma = 0.1
     print_every = 10
 
