@@ -3,6 +3,7 @@ Script to play a game as an AI.
 """
 
 import random
+import torch
 import pygame
 
 from src.constants import (
@@ -10,7 +11,6 @@ from src.constants import (
     INCREMENT_SPEED,
     POSITIVE_REWARD,
     NEGATIVE_REWARD,
-    LOSS_REWARD,
     WIDTH,
     HEIGHT,
     BLOCK_SIZE,
@@ -132,6 +132,20 @@ class SnakeAI:
 
         return False
 
+    def _distance_to_food(self) -> int:
+        """
+        Obtains the L1 distance from the head of the snake to the food.
+
+        Returns
+        -------
+        L1 distance from the head of the snake to the food.
+        """
+
+        head_x, head_y = self.snake[0]
+        food_x, food_y = self.food
+
+        return abs(head_x - food_x) + abs(head_y - food_y)
+
     def play_step(self, action: int) -> tuple[bool, int]:
         """
         Moves the snake depending on the action chosen by the agent.
@@ -146,8 +160,10 @@ class SnakeAI:
         """
 
         # Move
+        prev_distance_to_food = self._distance_to_food()
         direction = self._get_direction(action)
         new_head = self._move(direction)
+        new_distance_to_food = self._distance_to_food()
         self.snake.insert(0, new_head)
 
         # Update UI and clock
@@ -157,7 +173,7 @@ class SnakeAI:
 
         # Check collision
         if self.is_collision(self.snake[0]):
-            return True, LOSS_REWARD
+            return True, NEGATIVE_REWARD
 
         # Check if we eat food
         if self.snake[0] == self.food:
@@ -169,7 +185,9 @@ class SnakeAI:
         # Delete last element
         self.snake.pop()
 
-        return False, NEGATIVE_REWARD
+        if new_distance_to_food < prev_distance_to_food:
+            return False, 1
+        return False, 0
 
     def _get_direction(self, action: int) -> Direction:
         """
@@ -250,3 +268,64 @@ class SnakeAI:
 
         # Display
         pygame.display.flip()
+
+    def game_to_array(self) -> torch.Tensor:
+        """
+        Obtains a tensor that represents the current game.
+
+        Returns
+        -------
+        Tensor representing the current game.
+        """
+
+        # Head and points around head
+        head_x, head_y = self.snake[0]
+        point_l = (head_x - BLOCK_SIZE, head_y)
+        point_r = (head_x + BLOCK_SIZE, head_y)
+        point_u = (head_x, head_y - BLOCK_SIZE)
+        point_d = (head_x, head_y + BLOCK_SIZE)
+
+        # Current direction as one hot
+        dir_l = self.direction == Direction.LEFT
+        dir_r = self.direction == Direction.RIGHT
+        dir_u = self.direction == Direction.UP
+        dir_d = self.direction == Direction.DOWN
+
+        # Possible collisions
+        collision_straight = (
+            (dir_r and self.is_collision(point_r))
+            or (dir_l and self.is_collision(point_l))
+            or (dir_u and self.is_collision(point_u))
+            or (dir_d and self.is_collision(point_d)),
+        )[0]
+        collision_right = (
+            (dir_u and self.is_collision(point_r))
+            or (dir_d and self.is_collision(point_l))
+            or (dir_l and self.is_collision(point_u))
+            or (dir_r and self.is_collision(point_d)),
+        )[0]
+        collision_left = (
+            (dir_d and self.is_collision(point_r))
+            or (dir_u and self.is_collision(point_l))
+            or (dir_r and self.is_collision(point_u))
+            or (dir_l and self.is_collision(point_d)),
+        )[0]
+
+        # Final representation
+        return torch.tensor(
+            [
+                collision_straight,
+                collision_right,
+                collision_left,
+                dir_l,
+                dir_r,
+                dir_u,
+                dir_d,
+                # Food location
+                self.food[0] < self.snake[0][0],  # food left
+                self.food[0] > self.snake[0][0],  # food right
+                self.food[1] < self.snake[0][1],  # food up
+                self.food[1] > self.snake[0][1],  # food down
+            ],
+            dtype=torch.float32,
+        )

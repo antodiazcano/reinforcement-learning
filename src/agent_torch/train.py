@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm  # type: ignore
 
 from src.snake import SnakeAI
-from src.pytorch.model import Agent
+from src.agent_torch.model import Agent
 
 
 class Trainer:
@@ -170,8 +170,8 @@ def main() -> None:
     agent = Agent()
     trainer = Trainer(agent)
 
-    epochs = 10
-    gamma = 0.1
+    epochs = 100
+    gamma = 0.9
     print_every = 10
 
     trainer.fit(epochs=epochs, gamma=gamma, print_every=print_every)

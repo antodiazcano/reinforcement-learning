@@ -7,6 +7,7 @@ flake8==7.1.1
 mypy==1.13.0
 complexipy==1.2.0
 torch==2.6.0
+neat-python==0.92
 tqdm==4.67.1
 matplotlib==3.10.1
 pygame==2.6.1
