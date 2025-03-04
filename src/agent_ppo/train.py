@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm  # type: ignore
 
 from src.snake import SnakeAI
-from src.agent_torch.model import Agent
+from src.agent_ppo.model import AgentPPO
 
 
 class Trainer:
@@ -16,7 +16,7 @@ class Trainer:
     Class to train the agent.
     """
 
-    def __init__(self, agent: Agent, lr: float = 1e-3) -> None:
+    def __init__(self, agent: AgentPPO, lr: float = 1e-3) -> None:
         """
         Constructor of the class.
 
@@ -117,7 +117,7 @@ class Trainer:
                 best_reward, epochs, print_every
             )
 
-        self._plot_training()
+        self.plot_training()
 
     def _update_agent_and_verbose(
         self, best_reward: float, epochs: int, print_every: int
@@ -141,12 +141,12 @@ class Trainer:
         # Update best agent
         if self.rewards[-1] > best_reward:
             best_reward = self.rewards[-1]
-            torch.save(self.agent.state_dict(), "weights/agent_pytorch.pt")
+            torch.save(self.agent.state_dict(), "weights/agent_ppo.pt")
             print(f"Epoch: {epoch}, new best mean reward: {best_reward:.2f}")
 
         return best_reward
 
-    def _plot_training(self) -> None:
+    def plot_training(self) -> None:
         """
         Saves the plot of the rewards obtained during the training.
         """
@@ -158,7 +158,7 @@ class Trainer:
         axs.set_ylabel("Mean Reward")
         axs.plot(range(1, len(self.rewards) + 1), self.rewards)
 
-        fig.savefig("images/train.png")
+        fig.savefig("images/train_ppo.png")
         plt.close(fig)
 
 
@@ -167,12 +167,12 @@ def main() -> None:
     Function to train the agent.
     """
 
-    agent = Agent()
+    agent = AgentPPO()
     trainer = Trainer(agent)
 
-    epochs = 100
+    epochs = 1_000
     gamma = 0.9
-    print_every = 10
+    print_every = 100
 
     trainer.fit(epochs=epochs, gamma=gamma, print_every=print_every)
 

@@ -7,22 +7,41 @@ import torch
 import neat  # type:ignore
 
 from src.snake import SnakeAI
-from src.agent_torch.model import Agent
+from src.agent_ppo.model import AgentPPO
+from src.dqn.model import AgentDQN
 
 
-def play_torch() -> None:
+def play_ppo() -> None:
     """
-    Plays a game with the trained PyTorch agent.
+    Plays a game with the trained PPO agent.
     """
 
-    agent = Agent()
-    weights = "weights/agent_pytorch.pt"
+    agent = AgentPPO()
+    weights = "weights/agent_ppo.pt"
     agent.load_state_dict(torch.load(weights))
     game = SnakeAI()
 
     game_over = False
     while not game_over:
-        action, _ = agent.act(game)
+        action, _ = agent.predict(game)
+        game_over, _ = game.play_step(action)
+
+    print(f"Score: {game.score}")
+
+
+def play_dqn() -> None:
+    """
+    Plays a game with the trained DQN agent.
+    """
+
+    agent = AgentDQN()
+    weights = "weights/agent_dqn.pt"
+    agent.load_state_dict(torch.load(weights))
+    game = SnakeAI()
+
+    game_over = False
+    while not game_over:
+        action, _ = agent.predict(game)
         game_over, _ = game.play_step(action)
 
     print(f"Score: {game.score}")
@@ -58,9 +77,12 @@ def main() -> None:
     Plays a game with the trained agent.
     """
 
-    use_torch = True
-    if use_torch:
-        play_torch()
+    agent = "dqn"
+
+    if agent == "ppo":
+        play_ppo()
+    elif agent == "dqn":
+        play_dqn()
     else:
         play_neat()
 

@@ -9,7 +9,7 @@ from torch.distributions import Categorical
 from src.snake import SnakeAI
 
 
-class Agent(nn.Module):
+class AgentDQN(nn.Module):
     """
     Class to define the agent.
     """
@@ -27,7 +27,7 @@ class Agent(nn.Module):
         self.relu = nn.ReLU()
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    def forward(self, game: SnakeAI) -> torch.Tensor:
+    def forward(self, game_array: torch.Tensor) -> torch.Tensor:
         """
         Forward pass.
 
@@ -40,12 +40,12 @@ class Agent(nn.Module):
         Output of the network.
         """
 
-        game_tensor = game.game_to_array().unsqueeze(0).to(self.device)
+        game_tensor = game_array.unsqueeze(0).to(self.device)
         x = self.relu(self.fc1(game_tensor))
         x = self.relu(self.fc2(x))
         return nn.functional.softmax(self.fc3(x), dim=1)
 
-    def act(self, game: SnakeAI) -> tuple[int, torch.Tensor]:
+    def act(self, game_array: torch.Tensor) -> tuple[int, torch.Tensor]:
         """
         The agent actuates given the state. It is very important to return a tensor
         instead of a float in the log prob because if not the backward pass can not be
@@ -60,11 +60,11 @@ class Agent(nn.Module):
         Action chosen and probability of the action.
         """
 
-        probs = self.forward(game)
+        probs = self.forward(game_array)
         dist = Categorical(probs=probs)
         action = dist.sample()
 
-        return action.item(), dist.log_prob(action)  # probs[0, action]
+        return action.item(), dist.log_prob(action)
 
     def predict(self, game: SnakeAI) -> tuple[int, torch.Tensor]:
         """
@@ -82,7 +82,7 @@ class Agent(nn.Module):
         """
 
         with torch.no_grad():
-            probs = self.forward(game)
+            probs = self.forward(game.game_to_array())
 
         action = int(torch.argmax(probs))
 

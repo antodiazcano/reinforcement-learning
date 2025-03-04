@@ -161,10 +161,10 @@ class SnakeAI:
 
         # Move
         prev_distance_to_food = self._distance_to_food()
-        direction = self._get_direction(action)
-        new_head = self._move(direction)
-        new_distance_to_food = self._distance_to_food()
+        self.direction = self._get_direction(action)
+        new_head = self._move(self.direction)
         self.snake.insert(0, new_head)
+        new_distance_to_food = self._distance_to_food()
 
         # Update UI and clock
         if self.visualize:
@@ -186,8 +186,8 @@ class SnakeAI:
         self.snake.pop()
 
         if new_distance_to_food < prev_distance_to_food:
-            return False, 1
-        return False, 0
+            return False, 0
+        return False, -1
 
     def _get_direction(self, action: int) -> Direction:
         """
