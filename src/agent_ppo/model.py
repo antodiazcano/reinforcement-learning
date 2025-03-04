@@ -1,5 +1,5 @@
 """
-This script defines the model used for the agent.
+This script defines the model used for the PPO agent.
 """
 
 import torch
@@ -17,6 +17,11 @@ class AgentPPO(nn.Module):
     def __init__(self, hidden_1: int = 128, hidden_2: int = 64) -> None:
         """
         Constructor of the class.
+
+        Parameters
+        ----------
+        hidden_1 : First hidden dimension.
+        hidden_2 : Second hidden dimension.
         """
 
         super().__init__()
@@ -57,10 +62,10 @@ class AgentPPO(nn.Module):
 
         Returns
         -------
-        Action chosen and probability of the action.
+        Action chosen and log probability of the action.
         """
 
-        probs = self.forward(game)
+        probs = self.forward(game)[0]
         dist = Categorical(probs=probs)
         action = dist.sample()
 
@@ -78,11 +83,13 @@ class AgentPPO(nn.Module):
 
         Returns
         -------
-        Action chosen and probabilities of the action.
+        Action chosen and probabilities of the actions.
         """
 
+        self.eval()
+
         with torch.no_grad():
-            probs = self.forward(game)
+            probs = self.forward(game)[0]
 
         action = int(torch.argmax(probs))
 

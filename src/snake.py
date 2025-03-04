@@ -1,5 +1,5 @@
 """
-Script to play a game as an AI.
+Script to represent the game.
 """
 
 import random
@@ -9,8 +9,10 @@ import pygame
 from src.constants import (
     Direction,
     INCREMENT_SPEED,
+    TOP_REWARD,
     POSITIVE_REWARD,
     NEGATIVE_REWARD,
+    LOSS_REWARD,
     WIDTH,
     HEIGHT,
     BLOCK_SIZE,
@@ -36,7 +38,7 @@ class SnakeAI:
         Parameters
         ----------
         visualize : True if we want to show the game on screen and False otherwise. When
-            training is better to set it to False.
+            training or testing is better to set it to False.
         """
 
         # Start pygame
@@ -130,6 +132,7 @@ class SnakeAI:
         if (point_x, point_y) in self.snake[1:]:
             return True
 
+        # No collision
         return False
 
     def _distance_to_food(self) -> int:
@@ -156,7 +159,7 @@ class SnakeAI:
 
         Returns
         -------
-        Boolean variable indicating if the game is over or not and reward obtained.
+        Boolean variable indicating if the game is over or not and the reward obtained.
         """
 
         # Move
@@ -173,27 +176,27 @@ class SnakeAI:
 
         # Check collision
         if self.is_collision(self.snake[0]):
-            return True, NEGATIVE_REWARD
+            return True, LOSS_REWARD
 
         # Check if we eat food
         if self.snake[0] == self.food:
             self.score += 1
             self.food = self._place_food()
             self.speed += INCREMENT_SPEED
-            return False, POSITIVE_REWARD
+            return False, TOP_REWARD
 
-        # Delete last element
+        # Delete last element (only if the snake has not eaten food)
         self.snake.pop()
 
         if new_distance_to_food < prev_distance_to_food:
-            return False, 0
-        return False, -1
+            return False, POSITIVE_REWARD
+        return False, NEGATIVE_REWARD
 
     def _get_direction(self, action: int) -> Direction:
         """
         Updates the position of the head of the snake. 0 is straight, 1 is right and 2
         is left. Note that 'behind' does not make sense because we would lose. We could
-        use 0, 1, 2 and 3 for up, left, right, down, and it would also be valid, but
+        use 0, 1, 2 and 3 for up, left, right and down, and it would also be valid, but
         this is more efficient.
 
         Parameters

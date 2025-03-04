@@ -1,5 +1,5 @@
 """
-Script to train the neat model.
+Script to train the NEAT model.
 """
 
 import pickle
@@ -10,17 +10,21 @@ from src.snake import SnakeAI
 
 def play_game(net: neat.nn.FeedForwardNetwork) -> float:
     """
-    The agent plays a game vs minimax.
+    The agent plays a game.
 
     Parameters
     ----------
     net : Net that models the actions of the agent.
+
+    Returns
+    -------
+    Mean reward obtained.
     """
 
     game = SnakeAI(visualize=False)
     total_reward = 0.0
 
-    max_steps = 100
+    max_steps = 500
     for i in range(max_steps):
         game_input = game.game_to_array().numpy()
         action = net.activate(game_input)
@@ -41,6 +45,7 @@ def evaluate_genomes(
     Parameters
     ----------
     genomes : Population.
+    config  : NEAT configuration.
     """
 
     for _, genome in genomes:
@@ -52,13 +57,17 @@ def evaluate_genomes(
         genome.fitness = fitness / games
 
 
-def fit(config_file: str) -> None:
+def fit(
+    epochs: int, config_file: str, weights_path: str = "weights/agent_neat.pkl"
+) -> None:
     """
     Trains the model and saves the best individual.
 
     Parameters
     ----------
-    config_file : Path to the config file.
+    epochs       : Epochs to train the model.
+    config_file  : Path to the config file.
+    weights_path : Path to save the weights of the agent.
     """
 
     config = neat.Config(
@@ -73,11 +82,12 @@ def fit(config_file: str) -> None:
     stats = neat.StatisticsReporter()
     population.add_reporter(stats)
 
-    epochs = 10
     winner = population.run(evaluate_genomes, epochs)
-    with open("weights/agent_neat.pkl", "wb") as file:
+    with open(weights_path, "wb") as file:
         pickle.dump(winner, file)
 
 
 if __name__ == "__main__":
-    fit("src/agent_neat/config.txt")
+    EPOCHS = 10
+    CONFIG_FILE = "src/agent_neat/config.txt"
+    fit(EPOCHS, CONFIG_FILE)

@@ -1,5 +1,5 @@
 """
-This script defines the model used for the agent.
+This script defines the model used for the DQN agent.
 """
 
 import torch
@@ -11,12 +11,17 @@ from src.snake import SnakeAI
 
 class AgentDQN(nn.Module):
     """
-    Class to define the agent.
+    Class to define the DQN agent.
     """
 
     def __init__(self, hidden_1: int = 128, hidden_2: int = 64) -> None:
         """
         Constructor of the class.
+
+        Parameters
+        ----------
+        hidden_1 : First hidden dimension.
+        hidden_2 : Second hidden dimension.
         """
 
         super().__init__()
@@ -33,7 +38,7 @@ class AgentDQN(nn.Module):
 
         Parameters
         ----------
-        game : Instance representing the current game.
+        game_array : Instance representing the current game.
 
         Returns
         -------
@@ -53,14 +58,14 @@ class AgentDQN(nn.Module):
 
         Parameters
         ----------
-        game : Current game.
+        game : Instance representing the current game.
 
         Returns
         -------
-        Action chosen and probability of the action.
+        Action chosen and log probability of the action.
         """
 
-        probs = self.forward(game_array)
+        probs = self.forward(game_array)[0]
         dist = Categorical(probs=probs)
         action = dist.sample()
 
@@ -78,11 +83,13 @@ class AgentDQN(nn.Module):
 
         Returns
         -------
-        Action chosen and probabilities of the action.
+        Action chosen and probabilities of the actions.
         """
 
+        self.eval()
+
         with torch.no_grad():
-            probs = self.forward(game.game_to_array())
+            probs = self.forward(game.game_to_array())[0]
 
         action = int(torch.argmax(probs))
 

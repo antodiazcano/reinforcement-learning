@@ -8,7 +8,7 @@ import neat  # type:ignore
 
 from src.snake import SnakeAI
 from src.agent_ppo.model import AgentPPO
-from src.dqn.model import AgentDQN
+from src.agent_dqn.model import AgentDQN
 
 
 def play_ppo() -> None:
@@ -83,8 +83,10 @@ def main() -> None:
         play_ppo()
     elif agent == "dqn":
         play_dqn()
-    else:
+    elif agent == "neat":
         play_neat()
+    else:
+        print("Choose a correct agent, i.e., 'ppo', 'dqn' or 'neat'.")
 
 
 if __name__ == "__main__":
