@@ -13,7 +13,7 @@ CONFIG = neat.Config(
     neat.DefaultReproduction,
     neat.DefaultSpeciesSet,
     neat.DefaultStagnation,
-    "src/agent_neat/config.txt",
+    "src/agent_neat/config_test.txt",
 )
 GENOME = neat.DefaultGenome(0)
 GENOMES = [(0, GENOME), (1, neat.DefaultGenome(1))]
@@ -48,5 +48,5 @@ def test_fit() -> None:
 
     epochs = 1
     weights_path = "weights/tests/agent_neat_test.pkl"
-    fit(epochs, "src/agent_neat/config.txt", weights_path=weights_path)
+    fit(epochs, "src/agent_neat/config_test.txt", weights_path=weights_path)
     assert os.path.exists(weights_path)

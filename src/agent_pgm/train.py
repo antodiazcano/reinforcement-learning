@@ -1,5 +1,5 @@
 """
-Script for the training of the PPO agent.
+Script for the training of the PGM agent.
 """
 
 from collections import deque
@@ -8,15 +8,15 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm  # type: ignore
 
 from src.snake import SnakeAI
-from src.agent_ppo.model import AgentPPO
+from src.agent_pgm.model import AgentPGM
 
 
-class PPOTrainer:
+class PGMTrainer:
     """
-    Class to train the PPO agent.
+    Class to train the PGM agent.
     """
 
-    def __init__(self, agent: AgentPPO, lr: float = 1e-3) -> None:
+    def __init__(self, agent: AgentPGM, lr: float = 1e-3) -> None:
         """
         Constructor of the class.
 
@@ -74,8 +74,8 @@ class PPOTrainer:
         self,
         epochs: int,
         gamma: float = 0.9,
-        image_path: str = "images/train_ppo.png",
-        weights_path: str = "weights/agent_ppo.pt",
+        image_path: str = "images/train_pgm.png",
+        weights_path: str = "weights/agent_pgm.pt",
     ) -> None:
         """
         Training of the agent.
@@ -96,7 +96,8 @@ class PPOTrainer:
             rewards, saved_log_probs = self._simulate_one_episode()
             self.rewards.append(sum(rewards) / len(rewards))
 
-            # Calculate returns
+            # Calculate returns. This is the trickiest part. We could follow the
+            # formula, but this is equivalent and more efficient.
             returns: deque = deque()
             for t in range(len(rewards))[::-1]:
                 disc_return_t = returns[0] if len(returns) > 0 else 0
@@ -174,8 +175,8 @@ def main() -> None:
     Function to train the agent.
     """
 
-    agent = AgentPPO()
-    trainer = PPOTrainer(agent)
+    agent = AgentPGM()
+    trainer = PGMTrainer(agent)
 
     epochs = 1_000
     gamma = 0.9

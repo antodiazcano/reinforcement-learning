@@ -6,11 +6,11 @@ import os
 from collections import deque
 import torch
 
-from src.agent_ppo.train import PPOTrainer
-from src.agent_ppo.model import AgentPPO
+from src.agent_pgm.train import PGMTrainer
+from src.agent_pgm.model import AgentPGM
 
 
-TRAINER = PPOTrainer(AgentPPO())
+TRAINER = PGMTrainer(AgentPGM())
 
 
 def test_simulate_episode() -> None:
@@ -46,8 +46,8 @@ def test_fit() -> None:
     Test for the fit function.
     """
 
-    image_path = "images/tests/train_ppo_test.png"
-    weights_path = "weights/tests/agent_ppo_test.pt"
+    image_path = "images/tests/train_pgm_test.png"
+    weights_path = "weights/tests/agent_pgm_test.pt"
     epochs = 2
     TRAINER.fit(
         epochs,

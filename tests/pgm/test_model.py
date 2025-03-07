@@ -4,11 +4,11 @@ Script to test the DQN agent.
 
 import torch
 
-from src.agent_ppo.model import AgentPPO
+from src.agent_pgm.model import AgentPGM
 from src.snake import SnakeAI
 
 
-MODEL = AgentPPO()
+MODEL = AgentPGM()
 GAME = SnakeAI(visualize=False)
 N = 100
 

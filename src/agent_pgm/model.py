@@ -1,5 +1,5 @@
 """
-This script defines the model used for the PPO agent.
+This script defines the model used for the PGM agent.
 """
 
 import torch
@@ -9,9 +9,9 @@ from torch.distributions import Categorical
 from src.snake import SnakeAI
 
 
-class AgentPPO(nn.Module):
+class AgentPGM(nn.Module):
     """
-    Class to define the agent.
+    Class to define PGM the agent.
     """
 
     def __init__(self, hidden_1: int = 128, hidden_2: int = 64) -> None:

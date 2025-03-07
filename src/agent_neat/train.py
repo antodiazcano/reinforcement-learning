@@ -4,6 +4,8 @@ Script to train the NEAT model.
 
 import pickle
 import neat  # type:ignore
+import torch
+import numpy as np
 
 from src.snake import SnakeAI
 
@@ -27,7 +29,10 @@ def play_game(net: neat.nn.FeedForwardNetwork) -> float:
     max_steps = 500
     for i in range(max_steps):
         game_input = game.game_to_array().numpy()
-        action = net.activate(game_input)
+        network_output = torch.nn.functional.softmax(
+            torch.tensor(net.activate(game_input)), dim=0
+        ).numpy()
+        action = np.random.choice(range(3), p=network_output)
         game_over, reward = game.play_step(action)
         total_reward += reward
         if game_over:

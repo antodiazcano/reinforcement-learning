@@ -2,22 +2,24 @@
 Script to play the game with the trained agent.
 """
 
+from typing import Literal
 import pickle
 import torch
 import neat  # type:ignore
+import numpy as np
 
 from src.snake import SnakeAI
-from src.agent_ppo.model import AgentPPO
+from src.agent_pgm.model import AgentPGM
 from src.agent_dqn.model import AgentDQN
 
 
-def play_ppo() -> None:
+def play_pgm() -> None:
     """
-    Plays a game with the trained PPO agent.
+    Plays a game with the trained PGM agent.
     """
 
-    agent = AgentPPO()
-    weights = "weights/agent_ppo.pt"
+    agent = AgentPGM()
+    weights = "weights/agent_pgm.pt"
     agent.load_state_dict(torch.load(weights))
     game = SnakeAI()
 
@@ -68,26 +70,29 @@ def play_neat() -> None:
     game_over = False
     while not game_over:
         game_input = game.game_to_array().numpy()
-        action = net.activate(game_input)
+        action = int(np.argmax(net.activate(game_input)))
         game_over, _ = game.play_step(action)
 
 
-def main() -> None:
+def main(agent: Literal["dqn", "pgm", "neat"]) -> None:
     """
     Plays a game with the trained agent.
+
+    Parameters
+    ----------
+    agent : The trained agent we want to use.
     """
 
-    agent = "dqn"
-
-    if agent == "ppo":
-        play_ppo()
+    if agent == "pgm":
+        play_pgm()
     elif agent == "dqn":
         play_dqn()
     elif agent == "neat":
         play_neat()
     else:
-        print("Choose a correct agent, i.e., 'ppo', 'dqn' or 'neat'.")
+        print("Choose a correct agent, i.e., 'pgm', 'dqn' or 'neat'.")
 
 
 if __name__ == "__main__":
-    main()
+    AGENT: Literal["dqn", "pgm", "neat"] = "dqn"
+    main(AGENT)
